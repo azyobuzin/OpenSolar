@@ -381,13 +381,13 @@ namespace Solar
 						foreach (var i in cp.Accounts)
 							using (var client = new TwitterClient(i, cp.StatusCache))
 							{
-								var followers = client.Statuses.Followers().SelectMany().Freeze();
-								var friends = client.Statuses.Friends().SelectMany().Freeze();
-								var eq = new InstantEqualityComparer<Status>(_ => _.UserID);
+								var followers = client.Followers.List().SelectMany().Freeze();
+								var friends = client.Friends.List().SelectMany().Freeze();
+								var eq = new InstantEqualityComparer<User>(_ => _.UserID);
 
-								this.Follows.AddRangeAsync(followers.Intersect(friends, eq).Select(_ => new Follow(FollowState.TwoWay, _.User)));
-								this.Follows.AddRangeAsync(friends.Except(followers, eq).Select(_ => new Follow(FollowState.Following, _.User)));
-								this.Follows.AddRangeAsync(followers.Except(friends, eq).Select(_ => new Follow(FollowState.Follower, _.User)));
+								this.Follows.AddRangeAsync(followers.Intersect(friends, eq).Select(_ => new Follow(FollowState.TwoWay, _)));
+								this.Follows.AddRangeAsync(friends.Except(followers, eq).Select(_ => new Follow(FollowState.Following, _)));
+								this.Follows.AddRangeAsync(followers.Except(friends, eq).Select(_ => new Follow(FollowState.Follower, _)));
 							}
 
 				}

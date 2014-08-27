@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Concurrency;
+using System.Reactive.Threading.Tasks;
 
 namespace Solar
 {
@@ -138,7 +139,7 @@ namespace Solar
                     {
                         File.SetLastWriteTime(GetCachePath(value), DateTime.Now);
                         ((Func<string, FileStream>)File.OpenRead).ToAsync()(GetCachePath(value))
-                            .ObserveOn(Scheduler.NewThread)
+                            .ObserveOn(NewThreadScheduler.Default)
                             .SelectMany(_ => Observable.Using(() => _, fs => new[] { fs.Freeze() }.ToObservable()))
                             .Do(ms => { lock (value) window.Dispatcher.Invoke(func, CreateImage(ms, value)); })
                             .Subscribe(ms => ms.Dispose(), ex => App.Log(ex), () => { });
@@ -151,8 +152,9 @@ namespace Solar
                         HttpWebRequest req = (HttpWebRequest)WebRequest.Create(value);
                         req.UserAgent = "Solar";
                         req.Timeout = 30000;
-                        Observable.FromAsyncPattern<WebResponse>(req.BeginGetResponse, req.EndGetResponse)()
-                            .ObserveOn(Scheduler.NewThread)
+                        Task.Factory.FromAsync<WebResponse>(req.BeginGetResponse, req.EndGetResponse, null)
+                            .ToObservable()
+                            .ObserveOn(NewThreadScheduler.Default)
                             .SelectMany(res => Observable.Using(() => res.GetResponseStream(), ns => new[] { ns.Freeze() }.ToObservable()))
                             .Do(ms => { lock (value) if (!File.Exists(GetCachePath(value))) File.WriteAllBytes(GetCachePath(value), ms.ToArray()); })
                             .Do(ms => { lock (value) window.Dispatcher.Invoke(func, CreateImage(ms, value)); })

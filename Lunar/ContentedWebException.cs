@@ -56,6 +56,8 @@ namespace Lunar
 
 					if (json.error())
 						message = json.error;
+					else if (json.errors())
+						message = json.errors[0].message;
 				}
 
 				return new ContentedWebException(message, ex, ex.Status, ex.Response)

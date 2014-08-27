@@ -388,7 +388,7 @@ namespace Solar.Models
 						},
 						Interval = TimeSpan.FromMinutes(10),
 					},
-					new Category("RT", new HomeFilterSource(), new MentionsFilterSource(), new RetweetedByMeFilterSource(), new RetweetedToMeFilterSource(), new RetweetsOfMeFilterSource())
+					new Category("RT", new HomeFilterSource(), new MentionsFilterSource(), new RetweetsOfMeFilterSource())
 					{
 						Filter =
 						{
@@ -712,7 +712,6 @@ namespace Solar.Models
 				(
 					(HomeFilterSource _) => !status.IsDirectMessage && (_.Account == 0 || status.Account.UserID == _.Account),
 					(SentFilterSource _) => !status.IsDirectMessage && (_.Account == 0 || status.Account.UserID == _.Account),
-					(PublicFilterSource _) => !status.IsDirectMessage,
 					(SearchFilterSource _) => status.Text.Contains(_.Query),
 					(DirectMessagesSentFilterSource _) => status.IsDirectMessage && (_.Account == 0 || status.Account.UserID == _.Account)
 				) && i.Filter.Terms.All(_ => _.FilterStatuses(EnumerableEx.Wrap(status)).Any())))

@@ -1270,7 +1270,7 @@ namespace Solar
 						{
 							using (new ReduceAuthenticatedQueryScope())
 							using (var client = new TwitterClient(this.PostAccount.InternalAccount, this.Model.StatusCache))
-								this.FollowerNames = client.Statuses.Followers(this.PostAccount.InternalAccount.Name).SelectMany().Select(_ => _.UserName).Freeze();
+								this.FollowerNames = client.Followers.List(this.PostAccount.InternalAccount.Name).SelectMany().Select(_ => _.Name).Freeze();
 						}
 						catch (Exception ex)
 						{

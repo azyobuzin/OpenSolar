@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Lunar;
 
 namespace Solar.Filtering
@@ -29,7 +30,9 @@ namespace Solar.Filtering
 				range.Page == 1 ||
 				range.Page < currentPage)
 			{
-				statuses = client.Statuses.Followers(this.UserName ?? client.Account.Name).GetEnumerator();
+				statuses = client.Followers.List(this.UserName ?? client.Account.Name)
+					.Select(p => p.Select(u => u.Status))
+					.GetEnumerator();
 				currentPage = 1;
 			}
 

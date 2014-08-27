@@ -10,7 +10,7 @@ namespace Lunar
 	/// </summary>
 	public static class TwitterUriBuilder
 	{
-		static readonly Uri baseUri = new Uri("http://api.twitter.com/1/");
+		static readonly Uri baseUri = new Uri("http://api.twitter.com/1.1/");
 		static readonly Uri oAuthBaseUri = new Uri("http://api.twitter.com/oauth/");
 		static readonly Uri searchBaseUri = new Uri("http://search.twitter.com/");
 
@@ -116,23 +116,6 @@ namespace Lunar
 
 		public static class Statuses
 		{
-			public static Uri PublicTimeline(StatusID sinceID, StatusID maxID, int count, int page)
-			{
-				return Build
-				(
-					"statuses/public_timeline.json",
-					new
-					{
-						since_id = sinceID,
-						max_id = maxID,
-						count,
-						page,
-						include_entities = true,
-						include_my_retweet = true,
-					}
-				);
-			}
-
 			public static Uri HomeTimeline(StatusID sinceID, StatusID maxID, int count, int page)
 			{
 				return Build
@@ -154,9 +137,10 @@ namespace Lunar
 			{
 				return Build
 				(
-					"statuses/user_timeline/" + id + ".json",
+					"statuses/user_timeline.json",
 					new
 					{
+						screen_name = id,
 						include_rts = 1,
 						since_id = sinceID,
 						max_id = maxID,
@@ -168,11 +152,11 @@ namespace Lunar
 				);
 			}
 
-			public static Uri Mentions(StatusID sinceID, StatusID maxID, int count, int page)
+			public static Uri MentionsTimeline(StatusID sinceID, StatusID maxID, int count, int page)
 			{
 				return Build
 				(
-					"statuses/mentions.json",
+					"statuses/mentions_timeline.json",
 					new
 					{
 						since_id = sinceID,
@@ -227,64 +211,6 @@ namespace Lunar
 					"statuses/retweet/" + id + ".json",
 					new
 					{
-						include_entities = true,
-					}
-				);
-			}
-
-			public static Uri Friends(string id, long cursor = default(long))
-			{
-				return Build
-				(
-					"statuses/friends/" + id + ".json",
-					new
-					{
-						cursor,
-						include_entities = true,
-					}
-				);
-			}
-
-			public static Uri Followers(string id, long cursor = default(long))
-			{
-				return Build
-				(
-					"statuses/followers/" + id + ".json",
-					new
-					{
-						cursor,
-						include_entities = true,
-					}
-				);
-			}
-
-			public static Uri RetweetedByMe(StatusID sinceID, StatusID maxID, int count, int page)
-			{
-				return Build
-				(
-					"statuses/retweeted_by_me.json",
-					new
-					{
-						since_id = sinceID,
-						max_id = maxID,
-						count,
-						page,
-						include_entities = true,
-					}
-				);
-			}
-
-			public static Uri RetweetedToMe(StatusID sinceID, StatusID maxID, int count, int page)
-			{
-				return Build
-				(
-					"statuses/retweeted_to_me.json",
-					new
-					{
-						since_id = sinceID,
-						max_id = maxID,
-						count,
-						page,
 						include_entities = true,
 					}
 				);
@@ -515,9 +441,10 @@ namespace Lunar
 			{
 				return Build
 				(
-					"favorites/" + id + ".json",
+					"favorites/list.json",
 					new
 					{
+						screen_name = id,
 						page,
 						include_entities = true,
 					}
@@ -528,9 +455,10 @@ namespace Lunar
 			{
 				return Build
 				(
-					"favorites/create/" + id + ".json",
+					"favorites/create.json",
 					new
 					{
+						id,
 						include_entities = true,
 					}
 				);
@@ -540,9 +468,10 @@ namespace Lunar
 			{
 				return Build
 				(
-					"favorites/destroy/" + id + ".json",
+					"favorites/destroy.json",
 					new
 					{
+						id,
 						include_entities = true,
 					}
 				);
@@ -554,9 +483,10 @@ namespace Lunar
 			{
 				return Build
 				(
-					"users/show/" + id + ".json",
+					"users/show.json",
 					new
 					{
+						screen_name = id,
 						include_entities = true,
 					}
 				);
@@ -664,28 +594,112 @@ namespace Lunar
 		}
 		public static class Friends
 		{
-			public static Uri Ids(string id, long cursor = default(long))
+			public static Uri Ids(UserID id, long cursor = default(long))
 			{
 				return Build
 				(
-					"friends/ids/" + id + ".json",
+					"friends/ids.json",
 					new
 					{
+						user_id = id,
 						cursor,
+					}
+				);
+			}
+
+			public static Uri Ids(string screenName, long cursor = default(long))
+			{
+				return Build
+				(
+					"friends/ids.json",
+					new
+					{
+						screen_name = screenName,
+						cursor,
+					}
+				);
+			}
+
+			public static Uri List(UserID id, long cursor = default(long))
+			{
+				return Build
+				(
+					"friends/list.json",
+					new
+					{
+						user_id = id,
+						cursor,
+						count = 200
+					}
+				);
+			}
+
+			public static Uri List(string screenName, long cursor = default(long))
+			{
+				return Build
+				(
+					"friends/list.json",
+					new
+					{
+						screen_name = screenName,
+						cursor,
+						count = 200
 					}
 				);
 			}
 		}
 		public static class Followers
 		{
-			public static Uri Ids(string id, long cursor = default(long))
+			public static Uri Ids(UserID id, long cursor = default(long))
 			{
 				return Build
 				(
-					"followers/ids/" + id + ".json",
+					"followers/ids.json",
 					new
 					{
+						user_id = id,
 						cursor,
+					}
+				);
+			}
+
+			public static Uri Ids(string screenName, long cursor = default(long))
+			{
+				return Build
+				(
+					"followers/ids.json",
+					new
+					{
+						screen_name = screenName,
+						cursor,
+					}
+				);
+			}
+
+			public static Uri List(UserID id, long cursor = default(long))
+			{
+				return Build
+				(
+					"followers/list.json",
+					new
+					{
+						user_id = id,
+						cursor,
+						count = 200
+					}
+				);
+			}
+
+			public static Uri List(string screenName, long cursor = default(long))
+			{
+				return Build
+				(
+					"followers/list.json",
+					new
+					{
+						screen_name = screenName,
+						cursor,
+						count = 200
 					}
 				);
 			}
@@ -783,7 +797,7 @@ namespace Lunar
 			{
 				return Build
 				(
-					new Uri("https://userstream.twitter.com/2/"),
+					new Uri("https://userstream.twitter.com/1.1/"),
 					"user.json",
 					new
 					{

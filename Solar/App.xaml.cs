@@ -164,10 +164,10 @@ namespace Solar
 		public static Exception Log(Exception ex)
 		{
 #if DEBUG
-            if (!ex.Message.Contains("OAuth") && !ex.Message.Contains("401") && !ex.Message.Contains("API 実行"))
-                throw ex;
+			if (!ex.Message.Contains("OAuth") && !ex.Message.Contains("401") && !ex.Message.Contains("API 実行"))
+				throw ex;
 #endif
-            lock (App.Current)
+			lock (App.Current)
 				File.AppendAllText(Path.Combine(StartupPath, "Solar.slexc"), AssemblyVersion + " " + DateTime.Now + "\r\n" + ex.ToString() + "\r\n----\r\n\r\n");
 
 			return ex;
@@ -179,7 +179,7 @@ namespace Solar
 #if !DEBUG
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 #endif
-            VisualStylesEnabled.Initialize();
+			VisualStylesEnabled.Initialize();
 
 			var current = Process.GetCurrentProcess();
 			var ps = Process.GetProcessesByName(current.ProcessName)

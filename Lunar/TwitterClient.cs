@@ -121,6 +121,18 @@ namespace Lunar
 			private set;
 		}
 
+		public TwitterFriends Friends
+		{
+			get;
+			private set;
+		}
+
+		public TwitterFollowers Followers
+		{
+			get;
+			private set;
+		}
+
 		/// <summary>
 		/// ブロックに関する機能を提供します。
 		/// </summary>
@@ -189,6 +201,8 @@ namespace Lunar
 			this.Favorites = new TwitterFavorites(this);
 			this.Users = new TwitterUsers(this);
 			this.Friendships = new TwitterFriendships(this);
+			this.Friends = new TwitterFriends(this);
+			this.Followers = new TwitterFollowers(this);
 			this.Blocks = new TwitterBlocks(this);
 			this.Account = authorized;
 			this.StatusCache = statusCache;
@@ -432,27 +446,6 @@ namespace Lunar
 			}
 
 			/// <summary>
-			/// パブリックタイムラインを取得します。
-			/// </summary>
-			/// <returns>パブリックタイムラインのつぶやき。</returns>
-			public IEnumerable<Status> PublicTimeline()
-			{
-				return PublicTimeline(new StatusRange());
-			}
-
-			/// <summary>
-			/// 指定した範囲のパブリックタイムラインを取得します。
-			/// </summary>
-			/// <param name="range">取得範囲。</param>
-			/// <returns>パブリックタイムラインのつぶやき。</returns>
-			public IEnumerable<Status> PublicTimeline(StatusRange range)
-			{
-				foreach (dynamic i in client.DownloadDynamic(TwitterUriBuilder.Statuses.PublicTimeline(range.SinceID, range.MaxID, range.Count, range.Page)))
-					if (i != null)
-						yield return client.StatusCache.SetStatus(new Status(client, i));
-			}
-
-			/// <summary>
 			/// ホームタイムラインを取得します。
 			/// </summary>
 			/// <returns>ホームタイムラインのつぶやき。</returns>
@@ -469,48 +462,6 @@ namespace Lunar
 			public IEnumerable<Status> HomeTimeline(StatusRange range)
 			{
 				foreach (dynamic i in client.DownloadDynamic(TwitterUriBuilder.Statuses.HomeTimeline(range.SinceID, range.MaxID, range.Count, range.Page), false))
-					if (i != null)
-						yield return client.StatusCache.SetStatus(new Status(client, i));
-			}
-
-			/// <summary>
-			/// 自分の RT を取得します。
-			/// </summary>
-			/// <returns>自分の RT。</returns>
-			public IEnumerable<Status> RetweetedByMe()
-			{
-				return RetweetedByMe(new StatusRange());
-			}
-
-			/// <summary>
-			/// 指定した範囲の自分の RT を取得します。
-			/// </summary>
-			/// <param name="range">取得範囲。</param>
-			/// <returns>自分の RT。</returns>
-			public IEnumerable<Status> RetweetedByMe(StatusRange range)
-			{
-				foreach (dynamic i in client.DownloadDynamic(TwitterUriBuilder.Statuses.RetweetedByMe(range.SinceID, range.MaxID, range.Count, range.Page), false))
-					if (i != null)
-						yield return client.StatusCache.SetStatus(new Status(client, i));
-			}
-
-			/// <summary>
-			/// 自分への RT を取得します。
-			/// </summary>
-			/// <returns>自分への RT。</returns>
-			public IEnumerable<Status> RetweetedToMe()
-			{
-				return RetweetedToMe(new StatusRange());
-			}
-
-			/// <summary>
-			/// 指定した範囲の自分への RT を取得します。
-			/// </summary>
-			/// <param name="range">取得範囲。</param>
-			/// <returns>自分への RT。</returns>
-			public IEnumerable<Status> RetweetedToMe(StatusRange range)
-			{
-				foreach (dynamic i in client.DownloadDynamic(TwitterUriBuilder.Statuses.RetweetedToMe(range.SinceID, range.MaxID, range.Count, range.Page), false))
 					if (i != null)
 						yield return client.StatusCache.SetStatus(new Status(client, i));
 			}
@@ -611,7 +562,7 @@ namespace Lunar
 			/// <returns>返信。</returns>
 			public IEnumerable<Status> Mentions(StatusRange range)
 			{
-				foreach (dynamic i in client.DownloadDynamic(TwitterUriBuilder.Statuses.Mentions(range.SinceID, range.MaxID, range.Count, range.Page), false))
+				foreach (dynamic i in client.DownloadDynamic(TwitterUriBuilder.Statuses.MentionsTimeline(range.SinceID, range.MaxID, range.Count, range.Page), false))
 					if (i != null)
 						yield return client.StatusCache.SetStatus(new Status(client, i));
 			}
@@ -669,83 +620,6 @@ namespace Lunar
 			public Status Retweet(StatusID id)
 			{
 				return client.StatusCache.SetStatus(new Status(client, client.UploadDynamic(TwitterUriBuilder.Statuses.Retweet(id))));
-			}
-
-			/// <summary>
-			/// フォローしているユーザのつぶやきを取得します。
-			/// </summary>
-			/// <returns>フォローしているユーザのつぶやき。</returns>
-			public IEnumerable<IEnumerable<Status>> Friends()
-			{
-				return Friends(client.Account.UserID);
-			}
-
-			/// <summary>
-			/// 指定されたユーザがフォローしているユーザのつぶやきを取得します。
-			/// </summary>
-			/// <param name="id">ユーザ ID。</param>
-			/// <returns>フォローしているユーザのつぶやき。</returns>
-			public IEnumerable<IEnumerable<Status>> Friends(UserID id)
-			{
-				return Friends(id.ToString());
-			}
-
-			/// <summary>
-			/// 指定されたユーザがフォローしているユーザのつぶやきを取得します。
-			/// </summary>
-			/// <param name="userName">ユーザ名。</param>
-			public IEnumerable<IEnumerable<Status>> Friends(string userName)
-			{
-				long cursor = -1;
-
-				do
-				{
-					var page = client.DownloadDynamic(TwitterUriBuilder.Statuses.Friends(userName, cursor));
-
-					yield return ((dynamic[])page.users).Select(_ => client.StatusCache.SetUser(new User(client, _))).Select(_ => _.Status ?? new Status(client, _));
-
-					cursor = (long)page.next_cursor;
-				}
-				while (cursor != 0);
-			}
-
-			/// <summary>
-			/// フォローされているユーザのつぶやきを取得します。
-			/// </summary>
-			/// <returns>フォローされているユーザのつぶやき。</returns>
-			public IEnumerable<IEnumerable<Status>> Followers()
-			{
-				return Followers(client.Account.UserID);
-			}
-
-			/// <summary>
-			/// 指定されたユーザがフォローされているユーザのつぶやきを取得します。
-			/// </summary>
-			/// <param name="id">ユーザ ID。</param>
-			/// <returns>フォローされているユーザのつぶやき。</returns>
-			public IEnumerable<IEnumerable<Status>> Followers(UserID id)
-			{
-				return Followers(id.ToString());
-			}
-
-			/// <summary>
-			/// 指定されたユーザがフォローされているユーザのつぶやきを取得します。
-			/// </summary>
-			/// <param name="userName">ユーザ名。</param>
-			/// <returns>フォローされているユーザのつぶやき。</returns>
-			public IEnumerable<IEnumerable<Status>> Followers(string userName)
-			{
-				long cursor = -1;
-
-				do
-				{
-					var page = client.DownloadDynamic(TwitterUriBuilder.Statuses.Followers(userName, cursor));
-
-					yield return ((dynamic[])page.users).Select(_ => client.StatusCache.SetUser(new User(client, _))).Select(_ => _.Status ?? new Status(client, _));
-
-					cursor = (long)page.next_cursor;
-				}
-				while (cursor != 0);
 			}
 
 			/// <summary>
@@ -1793,6 +1667,86 @@ namespace Lunar
 
 					foreach (var i in page.ids)
 						yield return i;
+
+					cursor = (long)page.next_cursor;
+				}
+				while (cursor != 0);
+			}
+		}
+
+		public class TwitterFriends
+		{
+			TwitterClient client;
+
+			internal TwitterFriends(TwitterClient client)
+			{
+				this.client = client;
+			}
+
+			public IEnumerable<IEnumerable<User>> List()
+			{
+				return List(client.Account.UserID);
+			}
+
+			public IEnumerable<IEnumerable<User>> List(UserID id)
+			{
+				return List(cursor => TwitterUriBuilder.Friends.List(id, cursor));
+			}
+
+			public IEnumerable<IEnumerable<User>> List(string userName)
+			{
+				return List(cursor => TwitterUriBuilder.Friends.List(userName, cursor));
+			}
+
+			private IEnumerable<IEnumerable<User>> List(Func<long, Uri> uriBuilder)
+			{
+				long cursor = -1;
+
+				do
+				{
+					var page = client.DownloadDynamic(uriBuilder(cursor));
+
+					yield return ((dynamic[])page.users).Select(_ => client.StatusCache.SetUser(new User(client, _)));
+
+					cursor = (long)page.next_cursor;
+				}
+				while (cursor != 0);
+			}
+		}
+
+		public class TwitterFollowers
+		{
+			TwitterClient client;
+
+			internal TwitterFollowers(TwitterClient client)
+			{
+				this.client = client;
+			}
+
+			public IEnumerable<IEnumerable<User>> List()
+			{
+				return List(client.Account.UserID);
+			}
+
+			public IEnumerable<IEnumerable<User>> List(UserID id)
+			{
+				return List(cursor => TwitterUriBuilder.Followers.List(id, cursor));
+			}
+
+			public IEnumerable<IEnumerable<User>> List(string userName)
+			{
+				return List(cursor => TwitterUriBuilder.Followers.List(userName, cursor));
+			}
+
+			private IEnumerable<IEnumerable<User>> List(Func<long, Uri> uriBuilder)
+			{
+				long cursor = -1;
+
+				do
+				{
+					var page = client.DownloadDynamic(uriBuilder(cursor));
+
+					yield return ((dynamic[])page.users).Select(_ => client.StatusCache.SetUser(new User(client, _)));
 
 					cursor = (long)page.next_cursor;
 				}

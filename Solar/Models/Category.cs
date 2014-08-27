@@ -17,7 +17,7 @@ namespace Solar.Models
 	[ContentProperty("Filter")]
 	public class Category : NotifyObject, ICloneable
 	{
-		static readonly HashSet<WeakReference<Category>> instances = new HashSet<WeakReference<Category>>();
+		static readonly HashSet<Ignition.WeakReference<Category>> instances = new HashSet<Ignition.WeakReference<Category>>();
 		internal static event EventHandler<EventArgs<Category>> OnGetStatuses;
 		/// <summary>
 		/// 更新前。
@@ -87,7 +87,7 @@ namespace Solar.Models
 			this.Statuses = new NotifyCollection<IEntry>();
 
 			CleanInstances();
-			instances.Add(new WeakReference<Category>(this));
+			instances.Add(new Ignition.WeakReference<Category>(this));
 
 			this.Statuses.CollectionChanging += (sender, e) =>
 			{
