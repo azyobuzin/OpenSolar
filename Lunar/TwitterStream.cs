@@ -193,7 +193,7 @@ namespace Lunar
 				var ub = new UriBuilder(TwitterUriBuilder.Stream.User(this.Track, this.Follows));
 				var query = string.IsNullOrEmpty(ub.Query) ? null : ub.Query.TrimStart('?');
 
-				ub.Query = null;
+				ub.Query = (string.IsNullOrEmpty(query) ? null : query + "&") + auth.CreateParameters("GET", ub.Uri, query);
 
 				using (var wc = new CustomWebClient
 				{
@@ -202,7 +202,7 @@ namespace Lunar
 						{ HttpRequestHeader.UserAgent, "Solar/" + Assembly.GetEntryAssembly().GetName().Version },
 					},
 				})
-				using (var ns = wc.OpenPost(ub.Uri, (string.IsNullOrEmpty(query) ? null : query + "&") + auth.CreateParameters("POST", ub.Uri, query)))
+				using (var ns = wc.OpenRead(ub.Uri))
 				using (var sr = new StreamReader(ns))
 				{
 					Connected.RaiseEvent(this, EventArgs.Empty);

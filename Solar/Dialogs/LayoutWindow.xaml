@@ -344,16 +344,6 @@
 											<x:Type TypeName="filter:FavoritesFilterSource" />
 										</ComboBoxItem.Tag>
 									</ComboBoxItem>
-									<ComboBoxItem Content="みんなの RT">
-										<ComboBoxItem.Tag>
-											<x:Type TypeName="filter:RetweetedToMeFilterSource" />
-										</ComboBoxItem.Tag>
-									</ComboBoxItem>
-									<ComboBoxItem Content="自分の RT">
-										<ComboBoxItem.Tag>
-											<x:Type TypeName="filter:RetweetedByMeFilterSource" />
-										</ComboBoxItem.Tag>
-									</ComboBoxItem>
 									<ComboBoxItem Content="RT されたつぶやき">
 										<ComboBoxItem.Tag>
 											<x:Type TypeName="filter:RetweetsOfMeFilterSource" />
@@ -367,11 +357,6 @@
 									<ComboBoxItem Content="ユーザ">
 										<ComboBoxItem.Tag>
 											<x:Type TypeName="filter:UserFilterSource" />
-										</ComboBoxItem.Tag>
-									</ComboBoxItem>
-									<ComboBoxItem Content="パブリック">
-										<ComboBoxItem.Tag>
-											<x:Type TypeName="filter:PublicFilterSource" />
 										</ComboBoxItem.Tag>
 									</ComboBoxItem>
 									<ComboBoxItem Content="検索">
